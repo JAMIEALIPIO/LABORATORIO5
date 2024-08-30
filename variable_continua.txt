@@ -1,0 +1,28 @@
+# Cargar las librerías necesarias
+library(ggplot2)
+library(gridExtra)
+
+# Seleccionar las características continuas
+df_continuous <- df[continuous_features]
+
+# Crear una lista para almacenar los gráficos
+plots <- list()
+
+# Bucle para trazar histogramas para cada característica continua
+for (i in seq_along(df_continuous)) {
+  col <- names(df_continuous)[i]
+  p <- ggplot(df_continuous, aes_string(x = col)) +
+    geom_histogram(aes(y = ..count..), bins = 30, fill = "red", alpha = 0.6, color = "none") +
+    geom_density(aes(y = ..count..), color = "blue", size = 1) +
+    labs(x = col, y = "Count") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    annotate("text", x = Inf, y = Inf, label = sprintf("μ=%.2f\nσ=%.2f", mean(df_continuous[[col]], na.rm = TRUE), sd(df_continuous[[col]], na.rm = TRUE)), 
+             hjust = 1.1, vjust = 1.1, size = 4, color = "white", 
+             bg = element_rect(fill = "#ff826e", color = "white", size = 0.5, linetype = "solid"))
+  
+  plots[[i]] <- p
+}
+
+# Crear una cuadrícula de gráficos
+grid.arrange(grobs = plots, ncol = 3, top = textGrob("Distribución de variables continuas", gp = gpar(fontsize = 20)))
